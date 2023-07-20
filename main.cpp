@@ -54,6 +54,14 @@ public:
         return p[0];
     }
 
+    void changeParameters(double spot, double strike, double rate, double vol, double time) {
+        stockPrice = spot;
+        strikePrice = strike;
+        riskFreeRate = rate;
+        volatility = vol;
+        timeToExpire = time;
+    }
+
 private:
     double normalCDF(double value) {
         return 0.5 * erfc(-value * M_SQRT1_2);
@@ -102,9 +110,51 @@ int main() {
 
     Option myOption(stockPrice, strikePrice, riskFreeRate, volatility, timeToExpire);
 
-    double optionPrice = myOption.calculatePrice();
+    bool exitMenu {false};
 
-    cout << "Option Price: " << optionPrice << endl;
+    while (!exitMenu) {
+        int choice = getMenuChoice();
+        
+        switch (choice) {
+            case 1: // Calculate Option Price
+            {
+                double optionPrice = myOption.calculatePrice();
+                cout << "------------\nOption Price: " << optionPrice << "\n------------" << endl;
+                break;
+            }
+            case 2: // Change Input Parameters
+            {
+                cout << "------------\nEnter the new price for the underlying asset: (£££ per share)" << endl;
+                cin >> stockPrice;
+
+                cout << "Enter the new strike price of the option: (£££ per share)" << endl;
+                cin >> strikePrice;
+
+                cout << "Enter the new risk-free interest rate: (% p.a.)" << endl;
+                cin >> riskFreeRate;
+
+                cout << "Enter the new volatility of the underlying asset: (% p.a.)" << endl;
+                cin >> volatility;
+
+                cout << "Enter the new time to expire (% of year)" << endl;
+                cin >> timeToExpire;
+
+                myOption.changeParameters(stockPrice, strikePrice, riskFreeRate, volatility, timeToExpire);
+                cout << "Input parameters updated successfully.\n------------" << endl;
+                break;
+            }
+            case 3: // Exit
+            {
+                exitMenu = true;
+                cout << "Exiting the Option Pricing Menu. Goodbye!" << endl;
+                break;
+            }
+            default:
+                cout << "Invalid choice. Please try again." << endl;
+                break;
+        }
+    }
 
     return 0;
 }
+
