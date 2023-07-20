@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cmath>
+#include <vector>
 
 using namespace std;
 
@@ -24,8 +25,33 @@ public:
     }
 
     // Binomial model
-    double calculateBinomial() {
-        return 0.0;
+    double calculateBinomial(int height = 100, double dividendYield = 0) {
+       double deltaTime = timeToExpire / height;
+       double up = exp(volatility * sqrt(deltaTime));
+       double riskNeutralProbUp = (up * exp(-dividendYield * deltaTime) - exp(-riskFreeRate * deltaTime)) / (pow(up, 2) - 1);
+       double riskNeutralProbDown = exp(-riskFreeRate * deltaTime) - riskNeutralProbUp;
+
+       vector<double> p(height, 0.0);
+
+       for (int i = 0; i < height; i++) {
+            p[i] = strikePrice - stockPrice * pow(up, 2 * i - height);
+            if (p[i] < 0) {
+                p[i] = 0;
+            }
+       }
+
+       double exercise {0};
+       for (int j = height - 1; j > -1; j--) {
+        for (int i = 0; i < j; i++) {
+            p[i] = riskNeutralProbUp * p[i + 1] + riskNeutralProbDown * p[i];
+            exercise = strikePrice - stockPrice * pow(up, 2 * i - j);
+            if (p[i] < exercise) {
+                p[i] = exercise;
+            }
+        }
+       }
+
+        return p[0];
     }
 
 private:
@@ -42,6 +68,18 @@ private:
     }
 
 };
+
+// Function to display the menu and get user choice
+int getMenuChoice() {
+    int choice;
+    cout << "------- Option Pricing Menu -------" << endl;
+    cout << "1. Calculate Option Price" << endl;
+    cout << "2. Change Input Parameters" << endl;
+    cout << "3. Exit" << endl;
+    cout << "Enter your choice: ";
+    cin >> choice;
+    return choice;
+}
 
 // Main function
 int main() {
